@@ -1,0 +1,53 @@
+name: njbuswatcher
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - apscheduler=3.7.0
+  - brotlipy=0.7.0
+  - ca-certificates=2020.12.5
+  - certifi=2020.12.5
+  - cffi=1.14.5
+  - chardet=4.0.0
+  - click=7.1.2
+  - cryptography=3.4.7
+  - dnspython=2.0.0
+  - geojson=2.5.0
+  - greenlet=1.0.0
+  - idna=2.10
+  - libcxx=11.1.0
+  - libffi=3.3
+  - libprotobuf=3.14.0
+  - lz4-c=1.9.3
+  - mysql-common=8.0.22
+  - mysql-connector-python=8.0.22
+  - mysql-libs=8.0.22
+  - mysqlclient=2.0.3
+  - ncurses=6.2
+  - openssl=1.1.1k
+  - pip=21.0.1
+  - protobuf=3.14.0
+  - pycparser=2.20
+  - pyopenssl=20.0.1
+  - pysocks=1.7.1
+  - python=3.9.2
+  - python-dotenv=0.16.0
+  - python_abi=3.9
+  - pytz=2021.1
+  - readline=8.1
+  - requests=2.25.1
+  - setuptools=49.6.0
+  - six=1.15.0
+  - sqlalchemy=1.4.4
+  - sqlite=3.35.3
+  - tk=8.6.10
+  - tzdata=2021a
+  - tzlocal=2.0.0
+  - urllib3=1.26.4
+  - wheel=0.36.2
+  - xz=5.2.5
+  - zlib=1.2.11
+  - zstd=1.4.9
+  - pip:
+    - gtfs-functions==1.0.1
+prefix: /opt/bin/miniconda3/envs/njbuswatcher

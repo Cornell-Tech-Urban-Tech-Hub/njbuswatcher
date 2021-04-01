@@ -49,10 +49,10 @@ Fetches list of active routes from NJTransit Clever Devices API http requests, t
     
 3. create the database (mysql only, 5.7 recommended)
     ```sql
-    CREATE DATABASE buses;
-    USE buses;
-    CREATE USER 'nycbuswatcher'@'localhost' IDENTIFIED BY 'bustime';
-    GRANT ALL PRIVILEGES ON * . * TO 'nycbuswatcher'@'localhost';
+    CREATE DATABASE buses_nj;
+    USE buses_nj;
+    CREATE USER 'njbuswatcher'@'localhost' IDENTIFIED BY 'njtransit';
+    GRANT ALL PRIVILEGES ON * . * TO 'njbuswatcher'@'localhost';
     FLUSH PRIVILEGES;
  
     ```
