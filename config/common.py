@@ -1,5 +1,5 @@
 config = {
-    'dbname': 'buses',
+    'dbname': 'buses_nj',
     'dbuser': 'njbuswatcher',
-    'dbpassword': 'bustime'
+    'dbpassword': 'njtransit'
 }

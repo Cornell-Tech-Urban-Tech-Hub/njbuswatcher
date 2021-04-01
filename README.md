@@ -1,3 +1,13 @@
+# todo
+6. update docs
+3. front end
+- write api 
+- copy dash over from nycbuswatcher
+4. dockerize
+5. deploy and test
+7. package release and push
+
+
 # njbuswatcher
 NJTransit bus scraper and visualization
 
@@ -5,7 +15,7 @@ NJTransit bus scraper and visualization
 # DOCS TO BE ADAPTED FROM NYC BUSWATCHER
 
 # NJTransit Scraper
-#### v4 2021 Apr 1
+#### v4.0 2021 Apr 1
 Anthony Townsend <atownsend@cornell.edu>
 
 ## function

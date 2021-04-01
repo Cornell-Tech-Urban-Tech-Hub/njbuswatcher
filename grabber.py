@@ -61,9 +61,9 @@ def grab_and_store(**kwargs):
     except:
         print('something happened')
     # data = response.read().decode("utf-8")
-    xml_data = njt.get_xml_data('nj','all_buses')
-    raw_buses, timestamp = ar.dump_to_file(xml_data)  # this returns the timestamp
-    num_buses = db.dump_to_db(raw_buses,args,config) #this returns the number of buses
+    xml_data, timestamp = njt.get_xml_data('nj','all_buses')
+    raw_buses = ar.dump_to_file(xml_data, timestamp)  # this returns the timestamp
+    num_buses = db.dump_to_db(raw_buses, args, config, timestamp) #this returns the number of buses
     # properly
     end = time.time()
     #todo calculate number of routes
