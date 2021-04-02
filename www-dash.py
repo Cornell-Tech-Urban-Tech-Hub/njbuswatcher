@@ -1,14 +1,10 @@
-# todo dash app
-
-
-
-
 import dash
 import dash_core_components as dcc
 import dash_html_components as html
 import pandas as pd
 import numpy as np
 import os
+import requests
 
 from dash.dependencies import Input, Output
 from plotly import graph_objs as go
@@ -22,31 +18,39 @@ app = dash.Dash(
 server = app.server
 
 
+# get tokens
+from dotenv import load_dotenv
+load_dotenv()
+mapbox_access_token = os.getenv("MAPBOX_API_KEY")
+
+
 # Plotly mapbox public token
 # "pk.eyJ1IjoicGxvdGx5bWFwYm94IiwiYSI6ImNrOWJqb2F4djBnMjEzbG50amg0dnJieG4ifQ.Zme1-Uzoi75IaFbieBDl3A"
 mapbox_access_token = os.getenv('MAPBOX_API_KEY')
 
-# Dictionary of important locations in New York
+# Dictionary of important locations in New Jersey
 list_of_locations = {
-    "Madison Square Garden": {"lat": 40.7505, "lon": -73.9934},
-    "Yankee Stadium": {"lat": 40.8296, "lon": -73.9262},
-    "Empire State Building": {"lat": 40.7484, "lon": -73.9857},
-    "New York Stock Exchange": {"lat": 40.7069, "lon": -74.0113},
-    "JFK Airport": {"lat": 40.644987, "lon": -73.785607},
-    "Grand Central Station": {"lat": 40.7527, "lon": -73.9772},
-    "Times Square": {"lat": 40.7589, "lon": -73.9851},
-    "Columbia University": {"lat": 40.8075, "lon": -73.9626},
-    "United Nations HQ": {"lat": 40.7489, "lon": -73.9680},
+    "Newark Airport": {"lat": 40.6895, "lon": -74.1745},
+    "Port Authority Bus Terminal": {"lat": 40.7569, "lon": -73.9903},
+    "Atlantic City Bus Terminal": {"lat": 39.3598, "lon": -74.4349},
 }
 
 # Initialize data frame
-# todo plug me into a new nyc.buswatcher.org API that sends back an hours worth of data at time in JSON
-datafile='data/feb2021e149th.csv'
-# todo and then turn that JSON into a dataframe
-df=pd.read_csv(datafile, sep='\t')
 
+url='http://127.0.0.1:5000/api/v1/nj/buses?output=geojson&rt=87&start=2021-04-01T00:00:00+00:00&end=2021-04-01T23:00:00+00:00'
+d = requests.get(url)
+j = d.json()
 
-df["Date/Time"] = pd.to_datetime(df["timestamp"], format="%Y-%m-%d %H:%M") #todo verify/update format
+data = dict()
+for i,n in enumerate(j['features']):
+    row = dict()
+    for key,value in n['properties'].items():
+        row[key]=value
+    data[i]=row
+
+df = pd.DataFrame.from_dict(data,orient='index')
+
+df["Date/Time"] = pd.to_datetime(df["timestamp"])
 df.index = df["Date/Time"]
 df.drop("Date/Time", 1, inplace=True)
 totalList = []
@@ -70,10 +74,9 @@ app.layout = html.Div(
                         html.Img(
                             className="logo", src=app.get_asset_url("cornell-logo.png")
                         ),
-                        html.H2("NYCBUSWATCHER VIEWER"),
+                        html.H2("NJBUSWATCHER VIEWER"),
                         html.P(
-                            """This visualization shows observed bus positions on 4 routes  
-                            serving the East 149th Street corridor in the Bronx.
+                            """This visualization shows observed bus positions throughout New Jersey.
                             Select different days using the 
                             date picker or by 
                             selecting
@@ -85,10 +88,10 @@ app.layout = html.Div(
                             children=[
                                 dcc.DatePickerSingle(
                                     id="date-picker",
-                                    min_date_allowed=dt(2021, 2, 1),
-                                    max_date_allowed=dt(2021, 2, 28),
-                                    initial_visible_month=dt(2021, 2, 1),
-                                    date=dt(2021, 2, 14).date(),
+                                    min_date_allowed=dt(2021, 4, 1),
+                                    max_date_allowed=dt(2021, 4, 1),
+                                    initial_visible_month=dt(2021, 4, 1),
+                                    date=dt(2021, 4, 1).date(),
                                     display_format="MMMM D, YYYY",
                                     style={"border": "0px solid black"},
                                 )
@@ -390,9 +393,9 @@ def getLatLonColor(selectedData, month, day):
 )
 #def update_graph(datePicked, selectedData, selectedLocation):
 def update_graph(datePicked, selectedData):
-    zoom = 12.0
-    latInitial = 40.81
-    lonInitial = -73.81
+    zoom = 9.0
+    latInitial = 40.0583
+    lonInitial = -74.4057
     bearing = 0
 
     # if selectedLocation:
@@ -476,7 +479,7 @@ def update_graph(datePicked, selectedData):
                             dict(
                                 args=[
                                     {
-                                        "mapbox.zoom": 12,
+                                        "mapbox.zoom": 9,
                                         "mapbox.center.lon": "-73.991251",
                                         "mapbox.center.lat": "40.7272",
                                         "mapbox.bearing": 0,
