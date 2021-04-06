@@ -1,7 +1,7 @@
-import datetime
+import datetime, os
 import xml.etree.ElementTree
 
-from lib.CommonTools import *
+from . import CommonTools as ct
 
 
 # API like: https://github.com/harperreed/transitapi/wiki/Unofficial-Bustracker-API
@@ -240,7 +240,7 @@ def parse_xml_getRoutePoints(data):
                         p.lon = float(_cond_get_single(pt, 'lon'))
                         p.waypoint_id = n
                         if n != 0:
-                            p.distance_to_prev_waypoint = distance(p_prev.lat, p_prev.lon, p.lat, p.lon)
+                            p.distance_to_prev_waypoint = ct.distance(p_prev.lat, p_prev.lon, p.lat, p.lon)
                         p_prev = p
                         n =+ 1
                         path.points.append(p)

@@ -3,7 +3,7 @@
 import dash_html_components as html
 import dash_bootstrap_components as dbc
 
-import lib.NJTransitAPI as api
+from . import NJTransitAPI as api
 
 # from pathlib import Path
 # import pandas as pd

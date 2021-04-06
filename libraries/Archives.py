@@ -1,6 +1,6 @@
 import os, glob, shutil, datetime, gzip
 
-import lib.NJTransitAPI as njt
+from . import NJTransitAPI as njt
 
 def filepath():
     path = ("data/")
