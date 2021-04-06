@@ -1,0 +1,71 @@
+version: '3'
+
+# from https://www.dabbleofdevops.com/blog/setup-a-mysql-python-docker-dev-stack
+# docker-compose build; docker-compose up -d
+
+services:
+
+  db:
+    image: mysql:5.7
+    restart: always
+    environment:   # Set up mysql database name and password
+      MYSQL_ROOT_PASSWORD: njtransit
+      MYSQL_DATABASE: buses_nj
+      MYSQL_USER: njbuswatcher
+      MYSQL_PASSWORD: njtransit
+      TZ: America/New_York
+    ports:
+      - 6033:3306 # n.b this is only for external connections
+    volumes:
+      - bus_database:/var/lib/mysql
+
+  grabber:
+    restart: always
+    build:
+      context: .
+    depends_on:
+      - db
+    volumes:
+      - bus_files:/app/data
+      - bus_assets:/app/assets
+    command:
+      # tail -f /dev/null
+      /opt/conda/envs/njbuswatcher/bin/python3 /app/grabber.py
+
+  api:
+    restart: always
+    build:
+      context: .
+    volumes:
+      - bus_assets:/app/assets
+    ports:
+      - 1708:80
+    environment:
+      - FLASK_APP=/app/www-api.py
+      - FLASK_DEBUG=1 #todo change this for deployment
+      - 'RUN=flask run --host=0.0.0.0 --port=80'
+    command: flask run --host=0.0.0.0 --port=80
+    # command: gunicorn -w 1 -b :8000 app:server #todo change this for deployment
+    # Infinite loop, to keep it alive, for debugging
+    # command: bash -c "while true; do echo 'sleeping...' && sleep 10; done"
+
+#  dash:
+#    restart: always
+#    build:
+#      context: .
+#    volumes:
+#      - bus_assets:/app/assets
+#    ports:
+#      - 80:8000
+##    environment:
+##      - FLASK_APP=/app/www-dash.py
+##      - FLASK_DEBUG=1 #future change this for deployment
+##      - 'RUN=flask run --host=0.0.0.0 --port=80'
+#    command: gunicorn -w 1 -b :8000 app:server
+#    # Infinite loop, to keep it alive, for debugging
+#    # command: bash -c "while true; do echo 'sleeping...' && sleep 10; done"
+
+volumes:
+  bus_database:
+  bus_files:
+  bus_assets:

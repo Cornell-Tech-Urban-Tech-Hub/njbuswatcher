@@ -141,14 +141,14 @@ api.add_resource(SystemAPI, '/api/v1/nj/buses', endpoint='buses')
 
 
 
-#--------------- LEAGACY ENDPOINTS ---------------
-
-# is the browser still caching this — wrap this in an http header to expire it?
-@app.route('/api/v1/nj/lastknownpositions')
-def lkp():
-    print (app.static_folder)
-    return send_from_directory(app.static_folder,'lastknownpositions.geojson')
-
+# #--------------- LEGACY ENDPOINTS ---------------
+#
+# # is the browser still caching this — wrap this in an http header to expire it?
+# @app.route('/api/v1/nj/lastknownpositions')
+# def lkp():
+#     print (app.static_folder)
+#     return send_from_directory(app.static_folder,'lastknownpositions.geojson')
+#
 
 
 

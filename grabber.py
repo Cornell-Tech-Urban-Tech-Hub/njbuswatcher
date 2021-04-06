@@ -9,48 +9,6 @@ import lib.NJTransitAPI as njt
 from config import config
 
 
-# todo rewrite this? or run the new map off the API using a query that grabs the last minute?
-# def dump_to_lastknownpositions(feeds):
-#     f_list=[]
-#     for route_bundle in feeds:
-#         for route_id,route_report in route_bundle.items():
-#             route_report = route_report.json()
-#             try:
-#                 for b in route_report['Siri']['ServiceDelivery']['VehicleMonitoringDelivery'][0]['VehicleActivity']:
-#                     p = geojson.Point((b['MonitoredVehicleJourney']['VehicleLocation']['Longitude'],
-#                                        b['MonitoredVehicleJourney']['VehicleLocation']['Latitude']))
-#
-#                     # this creates a gigantic file, need to be more selective with fields
-#                     # f = geojson.Feature(geometry=p, properties=flatten(b['MonitoredVehicleJourney']))
-#
-#                     # this version only shows ones with reported values
-#                     # f = geojson.Feature(geometry=p,properties={'occupancy':b['MonitoredVehicleJourney']['Occupancy']})
-#
-#                     # this should work
-#                     try:
-#                         occupancy={'occupancy':b['MonitoredVehicleJourney']['Occupancy']}
-#                     except KeyError:
-#                         occupancy = {'occupancy': 'empty'}
-#
-#                     try:
-#                         passengers={'passengers': str(b['MonitoredVehicleJourney']['MonitoredCall']['Extensions'][
-#                             'Capacities']['EstimatedPassengerCount'])}
-#                     except KeyError:
-#                         passengers = {'passengers': '0'}
-#
-#                     f = geojson.Feature(geometry=p, properties=[occupancy,passengers])
-#
-#                     f_list.append(f)
-#             except KeyError: # no VehicleActivity?
-#                 pass
-#     fc = geojson.feature.FeatureCollection(f_list)
-#
-#     with open('./api-www/static/lastknownpositions.geojson', 'w') as outfile:
-#         geojson.dump(fc, outfile)
-#
-#     return
-
-
 def grab_and_store(**kwargs):
     start = time.time()
     # path_list = get_path_list()
