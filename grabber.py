@@ -3,9 +3,9 @@ import requests
 from apscheduler.schedulers.background import BackgroundScheduler
 from dotenv import load_dotenv
 
-import lib.Archives as ar
-import lib.Database as db
-import lib.NJTransitAPI as njt
+from libraries import Archives as ar
+from libraries import Database as db
+from libraries import NJTransitAPI as njt
 from config import config
 
 

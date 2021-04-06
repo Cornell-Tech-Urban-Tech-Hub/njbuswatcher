@@ -16,7 +16,7 @@ from marshmallow import Schema, fields
 from sqlalchemy import create_engine
 from dotenv import load_dotenv
 
-import lib.Database as db
+from libraries import Database as db
 
 
 #--------------- INITIALIZATION ---------------
