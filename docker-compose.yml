@@ -39,7 +39,7 @@ services:
     volumes:
       - bus_assets:/app/assets
     ports:
-      - 1708:80
+      - 7308:80
     environment:
       - FLASK_APP=/app/www-api.py
       - FLASK_DEBUG=1 #todo change this for deployment

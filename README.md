@@ -1,21 +1,5 @@
-# todo
-6. update docs
-3. front end
-- write api 
-- copy dash over from nycbuswatcher
-4. dockerize
-5. deploy and test
-7. package release and push
-
-
-# njbuswatcher
-NJTransit bus scraper and visualization
-
-
-# DOCS TO BE ADAPTED FROM NYC BUSWATCHER
-
 # NJTransit Scraper
-#### v4.0 2021 Apr 1
+#### v4.0 2021 Apr 7
 Anthony Townsend <atownsend@cornell.edu>
 
 ## function
@@ -31,12 +15,10 @@ Fetches list of active routes from NJTransit Clever Devices API http requests, t
 
     `git clone https://github.com/anthonymobile/nycbuswatcher.git`
     
-2. obtain API keys and put them in .env (quotes not needed apparently)
-    - http://bustime.mta.info/wiki/Developers/Index/
+2. obtain a MapBox API key and put it in .env (quotes not needed apparently)
     - MapBox
 
     ```txt
-    API_KEY = fasjhfasfajskjrwer242jk424242
     MAPBOX_API_KEY = pk.ey42424fasjhfasfajskjrwer242jk424242
     ```
     
@@ -51,11 +33,11 @@ Fetches list of active routes from NJTransit Clever Devices API http requests, t
 
 1. clone the repo
 
-    `git clone https://github.com/anthonymobile/nycbuswatcher.git`
+    `git clone https://github.com/Cornell-Tech-Urban-Tech-Hub/njbuswatcher.git`
     
-2. obtain an API key from http://bustime.mta.info/wiki/Developers/Index/ and put it in .env
+2. obtain a Mapbox API key from http://bustime.mta.info/wiki/Developers/Index/ and put it in .env
 
-    `echo 'API_KEY = fasjhfasfajskjrwer242jk424242' > .env`
+    `echo 'MAPBOX_API_KEY = pk.ey42424fasjhfasfajskjrwer242jk424242' > .env`
     
 3. create the database (mysql only, 5.7 recommended)
     ```sql
@@ -84,7 +66,7 @@ if you just want to test out the grabber, you can run `export PYTHON_ENV=develop
 
 1. get a shell on the container and run another instance of the script, it should run with the same environment as the docker entrypoint and will spit out any errors that process is having without having to hunt around through log files
     ```
-    docker exec -it nycbuswatcher_grabber_1 /bin/bash
+    docker exec -it njbuswatcher_grabber_1 /bin/bash
     python buswatcher.py
     ```
  
@@ -96,30 +78,36 @@ talking to a database inside a docker container is a little weird
 1. *connect to mysql inside a container* to start a mysql client inside a mysql docker container
 
     ```
-    docker exec -it nycbuswatcher_db_1 mysql -uroot -p buses
+    docker exec -it njbuswatcher_db_1 mysql -uroot -p buses_nj
     [root password=bustime]
     ```
     
 2. quick diagnostic query for how many records per day
 
     ```sql
-   SELECT service_date, COUNT(*) FROM buses GROUP BY service_date;
+   SELECT DATE(timestamp), COUNT(*) FROM buses GROUP BY DATE(timestamp);
     ```
     
 3. query # of records by date/hour/minute
 
     ```sql
-     SELECT service_date, date_format(timestamp,'%Y-%m-%d %H-%i'), COUNT(*) \
-     FROM buses GROUP BY service_date, date_format(timestamp,'%Y-%m-%d %H-%i');
+     SELECT DATE(timestamp), date_format(timestamp,'%Y-%m-%d %H-%i'), COUNT(*) \
+     FROM buses GROUP BY DATE(timestamp), date_format(timestamp,'%Y-%m-%d %H-%i');
     ```
 
 ## 3. API
 
 The API returns a selected set of fields for all positions during a time interval specific using ISO 8601 format for a single route at a time. e.g.
 
-Required arguments: `output, route_short, start, end`
+Required arguments: `output, rt, start, end`
 Output must be `geojson` for now, other formats may be supported in the future. Also try to limit to one hour of data per request.
 
+testing (april 2021)
 ```json
-http://127.0.0.:5000/api/v1/nyc/buses?output=json&route_short=Bx4&start=2021-03-28T00:00:00+00:00&end=2021-03-28T01:00:00+00:00
+http://nyc.buswatcher.org:7308/api/v1/nj/buses?output=geojson&rt=119&start=2021-03-28T00:00:00+00:00&end=2021-04-28T01:00:00+00:00
+```
+
+production (future)
+```json
+http://nj.buswatcher.org/api/v1/nj/buses?output=geojson&rt=119&start=2021-03-28T00:00:00+00:00&end=2021-04-28T01:00:00+00:00
 ```
