@@ -1,3 +1,5 @@
+#todo build and test this stack locally
+
 version: '3'
 
 # from https://www.dabbleofdevops.com/blog/setup-a-mysql-python-docker-dev-stack
@@ -5,6 +7,7 @@ version: '3'
 
 services:
 
+  # todo, how to add indexes automatically at creation
   db:
     image: mysql:5.7
     restart: always
@@ -30,7 +33,11 @@ services:
       - bus_assets:/app/assets
     command:
       # tail -f /dev/null
-      /opt/conda/envs/njbuswatcher/bin/python3 /app/grabber.py
+      /opt/conda/envs/njbuswatcher/bin/python3 /app/acquire.py
+
+  #todo add a traekfik container, and tags that route:
+  # nj.buswatcher.org/api to api container
+  # nj.buswatcher.org to the streamlit dashboard app
 
   api:
     restart: always
@@ -41,7 +48,7 @@ services:
     ports:
       - 7308:80
     environment:
-      - FLASK_APP=/app/www-api.py
+      - FLASK_APP=/app/api.py
       - FLASK_DEBUG=1 #todo change this for deployment
       - 'RUN=flask run --host=0.0.0.0 --port=80'
     command: flask run --host=0.0.0.0 --port=80
@@ -49,7 +56,9 @@ services:
     # Infinite loop, to keep it alive, for debugging
     # command: bash -c "while true; do echo 'sleeping...' && sleep 10; done"
 
-#  dash:
+
+#todo replace with steamlit container
+#  app:
 #    restart: always
 #    build:
 #      context: .
