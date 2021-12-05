@@ -102,12 +102,6 @@ The API returns a selected set of fields for all positions during a time interva
 Required arguments: `output, rt, start, end`
 Output must be `geojson` for now, other formats may be supported in the future. Also try to limit to one hour of data per request.
 
-testing (april 2021)
-```json
-http://nyc.buswatcher.org:7308/api/v1/nj/buses?output=geojson&rt=119&start=2021-03-28T00:00:00+00:00&end=2021-04-28T01:00:00+00:00
-```
-
-production (future)
 ```json
 http://nj.buswatcher.org/api/v1/nj/buses?output=geojson&rt=119&start=2021-03-28T00:00:00+00:00&end=2021-04-28T01:00:00+00:00
 ```

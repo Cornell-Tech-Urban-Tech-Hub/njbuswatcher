@@ -4,7 +4,6 @@ version: '3.7'
 # docker-compose build; docker-compose up -d
 
 services:
-  # todo, how to add indexes automatically at creation
   db:
     image: mysql:5.7
     restart: always
