@@ -1,4 +1,4 @@
-version: '3'
+version: '3.7'
 
 # from https://www.dabbleofdevops.com/blog/setup-a-mysql-python-docker-dev-stack
 # docker-compose build; docker-compose up -d
@@ -56,6 +56,19 @@ services:
 
 #  app:
 #    todo traefik - streamlit app at /dash
+
+
+# todo add with the dyndns.env from ~/deployments/gandi-livedns
+# todo stop the other gandi-livedns stack
+#services:
+#  dyndns:
+#    image: jbbodart/gandi-livedns
+#    restart: unless-stopped
+#    env_file:
+#      - "dyndns.env"
+#
+
+
 
 volumes:
   bus_database:
