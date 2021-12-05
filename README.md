@@ -1,5 +1,5 @@
 # NJTransit Scraper
-#### v4.0 2021 Apr 7
+#### v4.1 2021 Dec 4
 Anthony Townsend <atownsend@cornell.edu>
 
 ## function
