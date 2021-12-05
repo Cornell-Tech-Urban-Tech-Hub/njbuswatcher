@@ -83,7 +83,7 @@ class BusObservation(Base):
     wid1 = Column(String(20))
     wid2 = Column(String(20))
     # todo index this somehow
-    timestamp = Column(DateTime())
+    timestamp = Column(DateTime(), index=True)
 
     # waypoint_distance = Column(Float())
     # waypoint_lat = Column(Float())
