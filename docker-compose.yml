@@ -1,12 +1,9 @@
-#todo build and test this stack locally
-
 version: '3'
 
 # from https://www.dabbleofdevops.com/blog/setup-a-mysql-python-docker-dev-stack
 # docker-compose build; docker-compose up -d
 
 services:
-
   # todo, how to add indexes automatically at creation
   db:
     image: mysql:5.7
@@ -17,8 +14,6 @@ services:
       MYSQL_USER: njbuswatcher
       MYSQL_PASSWORD: njtransit
       TZ: America/New_York
-    ports:
-      - 7034:3306 # n.b this is only for external connections
     volumes:
       - bus_database:/var/lib/mysql
 
@@ -35,9 +30,6 @@ services:
       # tail -f /dev/null
       /opt/conda/envs/njbuswatcher/bin/python3 /app/acquire.py
 
-  #todo add a traekfik container, and tags that route:
-  # nj.buswatcher.org/api to api container
-  # nj.buswatcher.org to the streamlit dashboard app
 
   api:
     restart: always
@@ -45,34 +37,25 @@ services:
       context: .
     volumes:
       - bus_assets:/app/assets
+    # todo traefik — api at /api
     ports:
-      - 7308:80
+      - 80:5000
     environment:
       - FLASK_APP=/app/api.py
-      - FLASK_DEBUG=1 #todo change this for deployment
-      - 'RUN=flask run --host=0.0.0.0 --port=80'
-    command: flask run --host=0.0.0.0 --port=80
+    command: flask run --host=0.0.0.0 --port=5000
     # command: gunicorn -w 1 -b :8000 app:server #todo change this for deployment
     # Infinite loop, to keep it alive, for debugging
     # command: bash -c "while true; do echo 'sleeping...' && sleep 10; done"
 
+# traefik:
+#   todo install traefik
 
-#todo replace with steamlit container
+#  map:
+#    todo traefik - react-bootstrap app at /
+#
+
 #  app:
-#    restart: always
-#    build:
-#      context: .
-#    volumes:
-#      - bus_assets:/app/assets
-#    ports:
-#      - 80:8000
-##    environment:
-##      - FLASK_APP=/app/www-dash.py
-##      - FLASK_DEBUG=1 #future change this for deployment
-##      - 'RUN=flask run --host=0.0.0.0 --port=80'
-#    command: gunicorn -w 1 -b :8000 app:server
-#    # Infinite loop, to keep it alive, for debugging
-#    # command: bash -c "while true; do echo 'sleeping...' && sleep 10; done"
+#    todo traefik - streamlit app at /dash
 
 volumes:
   bus_database:
