@@ -7,6 +7,12 @@ from sqlalchemy.ext.declarative import declarative_base
 
 Base = declarative_base()
 
+from config import config
+
+def get_engine():
+    engine = create_engine(get_db_url(config.config['dbuser'], config.config['dbpassword'], config.config['dbhost'], config.config['dbport'], config.config['dbname']))
+    return engine
+
 def create_table(db_url):
     engine = create_engine(db_url, echo=False)
     Base.metadata.create_all(engine)
@@ -22,7 +28,7 @@ def get_db_args(args,config):
         'dbname'])
 
 def get_db_url(dbuser,dbpassword,dbhost,dbport,dbname):
-    return 'mysql://{}:{}@{}:{}/{}'.format(dbuser,dbpassword,dbhost,dbport,dbname)
+    return 'mysql+pymysql://{}:{}@{}:{}/{}'.format(dbuser,dbpassword,dbhost,dbport,dbname)
 
 def get_session(dbuser,dbpassword,dbhost,dbport,dbname):
     engine = create_engine(get_db_url(dbuser,dbpassword,dbhost,dbport,dbname), echo=False)

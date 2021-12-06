@@ -1,49 +1,52 @@
-#-----------------------------------------------------------------------------------------
-# sources
-#
-# api approach adapted from https://www.codementor.io/@sagaragarwal94/building-a-basic-restful-api-in-python-58k02xsiq
-# query parameter handling after https://stackoverflow.com/questions/30779584/flask-restful-passing-parameters-to-get-request
-#-----------------------------------------------------------------------------------------
-
-import os
 from datetime import date, datetime
-from dateutil import parser
+from dateutil.parser import isoparse
 
-from flask import Flask, render_template, request, jsonify, abort, send_from_directory
-from flask_cors import CORS
-from flask_restful import Resource, Api
-from marshmallow import Schema, fields
-from sqlalchemy import create_engine
+from os.path import isfile
+import os
+from fastapi import FastAPI, Query, Path
+
+from fastapi.templating import Jinja2Templates
+from fastapi.middleware.cors import CORSMiddleware
+import uvicorn
+from argparse import ArgumentParser
+import logging
+import pathlib
+import inspect
+from starlette.responses import Response
+from starlette.responses import FileResponse
+
 from dotenv import load_dotenv
-
+from libraries.CommonTools import PrettyJSONResponse
 from libraries import Database as db
 
 
-#--------------- INITIALIZATION ---------------
-app = Flask(__name__,template_folder='./api-www/templates',static_url_path='/static',static_folder="api-www/static/")
-api = Api(app)
-CORS(app)
+#--------------- API INITIALIZATION ---------------
 
-from config import config
+app = FastAPI()
+
+origins = ["*"]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+templates = Jinja2Templates(directory="assets/templates")
+
+#--------------- MY INITIALIZATION ---------------
+
 load_dotenv()
+api_url_stem="/api/v2/nj/"
 api_key = os.getenv("MAPBOX_API_KEY")
-api_url_stem="/api/v1/nyc/livemap"
-#todo cant we get this and pass it back from lib.Database?
-db_connect = create_engine(db.get_db_url(config.config['dbuser'], config.config['dbpassword'], config.config[
-    'dbhost'], config.config['dbport'], config.config['dbname']))
-
+db_connect = db.get_engine()
 
 #--------------- HELPER FUNCTIONS ---------------
 
 def unpack_query_results(query):
     return [dict(zip(tuple(query.keys()), i)) for i in query.cursor]
-
-# def sparse_unpack_for_livemap(query):
-#     unpacked = [dict(zip(tuple(query.keys()), i)) for i in query.cursor]
-#     sparse_results = []
-#     for row in unpacked:
-#         sparse_results.append('something')
-#     return unpacked
 
 def query_builder(parameters):
     query_suffix = ''
@@ -51,13 +54,13 @@ def query_builder(parameters):
         if field == 'output':
             continue
         elif field == 'start':
-            query_suffix = query_suffix + '{} >= "{}" AND '\
-                .format('timestamp',parser.isoparse(value.replace(" ", "+", 1)))
-                # replace is a hack but gets the job done because + was stripped from url replaced by space
+            query_suffix = query_suffix + '{} >= "{}" AND ' \
+                .format('timestamp', isoparse(value.replace(" ", "+", 1)))
+            # replace is a hack but gets the job done because + was stripped from url replaced by space
             continue
         elif field == 'end':
-            query_suffix = query_suffix + '{} < "{}" AND '\
-                .format('timestamp', parser.isoparse(value.replace(" ", "+", 1)))
+            query_suffix = query_suffix + '{} < "{}" AND ' \
+                .format('timestamp', isoparse(value.replace(" ", "+", 1)))
             continue
         elif field == 'rt':
             query_suffix = query_suffix + '{} = "{}" AND '.format('rt', value)
@@ -67,7 +70,7 @@ def query_builder(parameters):
     query_suffix=query_suffix[:-4] # strip tailing ' AND'
     return query_suffix
 
-# todo this should dump with indent=4
+# todo this simple rewrite the result dictionary, not create actual JSON
 def results_to_FeatureCollection(results):
     geojson = {'type': 'FeatureCollection', 'features': []}
     for row in results['observations']:
@@ -83,8 +86,24 @@ def results_to_FeatureCollection(results):
         geojson['features'].append(feature)
     return geojson
 
+# todo this simple rewrite the result dictionary, not create actual JSON
+def make_FeatureCollection(results):
+    geojson = {'type': 'FeatureCollection', 'features': []}
+    for row in results['observations']:
+        feature = {'type': 'Feature',
+                   'properties': {},
+                   'geometry': {'type': 'Point',
+                                'coordinates': []}}
+        feature['geometry']['coordinates'] = [row['lon'], row['lat']]
+        for k, v in row.items():
+            if isinstance(v, (datetime, date)):
+                v = v.isoformat()
+            feature['properties'][k] = v
+        geojson['features'].append(feature)
+    return geojson
+
 #todo test debug kepler output
-def results_to_KeplerTable(query):
+def make_KeplerTable(query):
     results = query['observations']
     fields = [{"name":x} for x in dict.keys(results[0])]
 
@@ -107,54 +126,84 @@ def results_to_KeplerTable(query):
 
 #--------------- API ENDPOINTS ---------------
 
-class SystemQuerySchema(Schema):
-    rt = fields.Str(required=True)
-    start = fields.Str(required=False)  # in ISO 8601 e.g. 2020-08-11T14:42:00+00:00
-    end = fields.Str(required=False)  # in ISO 8601 e.g. 2020-08-11T15:12:00+00:00
-    output = fields.Str(required=True)
+# POSITIONS BY ROUTE, START + END
+@app.get("/api/v2/nj/buses", response_class=PrettyJSONResponse)
 
-system_schema = SystemQuerySchema()
+# http://127.0.0.1:5000/api/v2/nj/buses?output=geojson&rt=119&start=2021-12-01T00:00:00+00:00&end=2022-01-01T00:00:00+00:00
+# http://127.0.0.1:5000/api/v2/nj/buses?output=json&rt=119&start=2021-12-01T00:00:00+00:00&end=2022-01-01T00:00:00+00:00
+# http://127.0.0.1:5000/api/v2/nj/buses?output=json&rt=119&start=2021-12-01T00:00:00+00:00&end=2022-01-01T00:00:00+00:00
 
-class SystemAPI(Resource):
-    def get(self):
-        errors = system_schema.validate(request.args)
-        if errors:
-            abort(400, str(errors))
-        conn = db_connect.connect()
-        query_prefix = "SELECT * FROM buses WHERE {}"
-        query_suffix = query_builder(request.args)
-        query_compound = query_prefix.format(query_suffix )
-        print (query_compound)
-        query = conn.execute(query_compound)
-        results = {'observations': unpack_query_results(query)}
 
-        if request.args['output'] == 'geojson':
-            return results_to_FeatureCollection(results)
-        elif request.args['output'] == 'kepler':
-            return results_to_KeplerTable(results)
+# http://nj.buswatcher.org/api/v2/nj/buses?output=geojson&rt=119&start=2021-12-01T00:00:00+00:00&end=2021-12-31T00:00:00+00:00
 
-# http://nj.buswatcher.org/api/v1/nj/buses?output=geojson&rt=119&start=2021-03-28T00:00:00+00:00&end=2021-04-30T00:00:00+00:00
-# output=[geojson,kepler]
+
+# output=[json, geojson,kepler]
 # rt=route number
 # start=datetime in ISO8601
 # end=datetime in ISO8601
 
-api.add_resource(SystemAPI, '/api/v1/nj/buses', endpoint='buses')
+# # todo debug field validation
+# async def fetch_buses(*,
+#                       rt: str = Path(..., max_length=3),
+#                       start:datetime = Path(..., ge=1, le=12),
+#                       end:datetime = Path(..., ge=1, le=12),
+#                       format: str = Path(..., max_length=20)
+#                       ):
+
+#async def fetch_buses(rt: str, start:datetime, end:datetime, format: str):
+async def fetch_buses(rt: str, start:str, end:str, output: str):
+
+    # prepare the query
+    query_prefix = "SELECT * FROM buses WHERE {}"
+    query_suffix = query_builder({'rt': rt,
+                                  'start':start,
+                                  'end':end,
+                                  'output':output
+                                  }
+                                 )
+    query_compound = query_prefix.format(query_suffix )
+    print(query_compound)
+
+    # execute query
+    conn = db_connect.connect()
+    query = conn.execute(query_compound)
+
+    if output == 'json':
+        return {'observations': unpack_query_results(query)}
+    elif output == 'geojson':
+        return make_FeatureCollection(unpack_query_results(query))
+    elif output == 'kepler':
+        return make_KeplerTable(unpack_query_results(query))
 
 
-# todo rebuild this, but pointing at a static file updated with each grab
-# #--------------- LEGACY ENDPOINTS ---------------
-#
-# # is the browser still caching this — wrap this in an http header to expire it?
-# @app.route('/api/v1/nj/lastknownpositions')
-# def lkp():
-#     print (app.static_folder)
-#     return send_from_directory(app.static_folder,'lastknownpositions.geojson')
-#
+# POSITIONS RIGHT NOW (makes separate request to Clever Devices API)
+@app.get("/api/v2/nj/now", response_class=PrettyJSONResponse)
+
+# http://nj.buswatcher.org/api/v2/nj/now
+# http://127.0.0.1:5000/api/v2/nj/now
+
+async def fetch_live(rt: str, start:str, end:str, output: str):
+
+    # this should just grab latest postitions and dump it back in GeoJSON
+
+    return
 
 
 
 #--------------- MAIN ---------------
-
 if __name__ == '__main__':
-    app.run(debug=True)
+
+    parser = ArgumentParser(description='NJbuswatcher.org v2 API')
+    parser.add_argument("-v",
+                        "--verbose",
+                        help="increase output verbosity",
+                        action="store_true")
+
+    args = parser.parse_args()
+
+    if args.verbose:
+        logging.basicConfig(level=logging.DEBUG)
+    else:
+        logging.basicConfig(level=logging.WARNING)
+
+    uvicorn.run(app, port=5000, debug=True)

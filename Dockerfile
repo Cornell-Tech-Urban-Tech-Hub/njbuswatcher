@@ -5,7 +5,7 @@ RUN apt-get update -y; apt-get upgrade -y; apt-get install -y default-libmysqlcl
 ENV TZ=America/New_York
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
-COPY environment.yml environment.yml
+COPY environment.yml.bak environment.yml
 
 RUN conda update -n base -c defaults conda
 RUN conda env create -f environment.yml

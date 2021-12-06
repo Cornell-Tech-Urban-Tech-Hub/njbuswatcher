@@ -23,7 +23,7 @@ services:
     depends_on:
       - db
     volumes:
-      - bus_files:/app/data
+      - bus_files:/app/data #todo map this to a host folder?
       - bus_assets:/app/assets
     command:
       # tail -f /dev/null

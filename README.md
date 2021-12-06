@@ -2,6 +2,11 @@
 #### v4.1 2021 Dec 4
 Anthony Townsend <atownsend@cornell.edu>
 
+### dependencies
+
+- ```pip3 install mysqlclient``` is the only way to get mysql connection to work
+
+
 ## function
 
 Fetches list of active routes from NJTransit Clever Devices API http requests, then cycles through and fetches current vehicle positions for all buses operating on these routes. This avoids the poor performance of trying to grab the entire system feed from the MTA BusTime SIRI API. Dumps full API response (for later reprocessing to extract additional data) to compressed individual files and most of the vehicle status fields to mysql table (the upcoming stop data is omitted from the database dump for now). Fully dockerized, runs on scheduler 1x per minute. Data storage requirments ~ 1-2 Gb/day (guesstimate).
