@@ -1,7 +1,6 @@
 from datetime import date, datetime
 from dateutil.parser import isoparse
 
-from os.path import isfile
 import os
 from fastapi import FastAPI, Query, Path
 
@@ -10,10 +9,7 @@ from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 from argparse import ArgumentParser
 import logging
-import pathlib
-import inspect
-from starlette.responses import Response
-from starlette.responses import FileResponse
+
 
 from dotenv import load_dotenv
 from libraries.CommonTools import PrettyJSONResponse
@@ -133,6 +129,7 @@ def make_KeplerTable(query):
 # http://127.0.0.1:5000/api/v2/nj/buses?output=json&rt=119&start=2021-12-01T00:00:00+00:00&end=2022-01-01T00:00:00+00:00
 # http://127.0.0.1:5000/api/v2/nj/buses?output=json&rt=119&start=2021-12-01T00:00:00+00:00&end=2022-01-01T00:00:00+00:00
 
+# http://0.0.0.0/api/v2/nj/buses?output=json&rt=119&start=2021-12-01T00:00:00+00:00&end=2022-01-01T00:00:00+00:00
 
 # http://nj.buswatcher.org/api/v2/nj/buses?output=geojson&rt=119&start=2021-12-01T00:00:00+00:00&end=2021-12-31T00:00:00+00:00
 

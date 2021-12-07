@@ -1,0 +1,11 @@
+aiofiles
+dateutils
+geojson
+jinja2
+fastapi
+python-dotenv
+uvicorn
+requests
+sqlalchemy
+pymysql
+mysql-connector

@@ -30,21 +30,32 @@ services:
       /opt/conda/envs/njbuswatcher/bin/python3 /app/acquire.py
 
 
+#  api:
+#    restart: always
+#    build:
+#      context: .
+#    volumes:
+#      - bus_assets:/app/assets
+#    # todo traefik — api at /api
+#    ports:
+#      - 80:5000
+#    environment:
+#      - FLASK_APP=/app/api.py
+#    command: flask run --host=0.0.0.0 --port=5000
+#    # command: gunicorn -w 1 -b :8000 app:server #todo change this for deployment
+#    # Infinite loop, to keep it alive, for debugging
+#    # command: bash -c "while true; do echo 'sleeping...' && sleep 10; done"
+#
   api:
-    restart: always
     build:
       context: .
-    volumes:
-      - bus_assets:/app/assets
-    # todo traefik — api at /api
+      dockerfile: ./build/api/Dockerfile
+    restart: always
     ports:
-      - 80:5000
-    environment:
-      - FLASK_APP=/app/api.py
-    command: flask run --host=0.0.0.0 --port=5000
-    # command: gunicorn -w 1 -b :8000 app:server #todo change this for deployment
-    # Infinite loop, to keep it alive, for debugging
-    # command: bash -c "while true; do echo 'sleeping...' && sleep 10; done"
+      - 80:8080
+    volumes:
+      - ./data:/app/data
+
 
 # traefik:
 #   todo install traefik
