@@ -1,10 +1,9 @@
-version: '3'
+version: '3.7'
 
 # from https://www.dabbleofdevops.com/blog/setup-a-mysql-python-docker-dev-stack
 # docker-compose build; docker-compose up -d
 
 services:
-
   db:
     image: mysql:5.7
     restart: always
@@ -14,8 +13,6 @@ services:
       MYSQL_USER: njbuswatcher
       MYSQL_PASSWORD: njtransit
       TZ: America/New_York
-    ports:
-      - 7034:3306 # n.b this is only for external connections
     volumes:
       - bus_database:/var/lib/mysql
 
@@ -26,44 +23,60 @@ services:
     depends_on:
       - db
     volumes:
-      - bus_files:/app/data
+      - bus_files:/app/data #todo map this to a host folder?
       - bus_assets:/app/assets
     command:
       # tail -f /dev/null
-      /opt/conda/envs/njbuswatcher/bin/python3 /app/grabber.py
+      /opt/conda/envs/njbuswatcher/bin/python3 /app/acquire.py
 
-  api:
-    restart: always
-    build:
-      context: .
-    volumes:
-      - bus_assets:/app/assets
-    ports:
-      - 7308:80
-    environment:
-      - FLASK_APP=/app/www-api.py
-      - FLASK_DEBUG=1 #todo change this for deployment
-      - 'RUN=flask run --host=0.0.0.0 --port=80'
-    command: flask run --host=0.0.0.0 --port=80
-    # command: gunicorn -w 1 -b :8000 app:server #todo change this for deployment
-    # Infinite loop, to keep it alive, for debugging
-    # command: bash -c "while true; do echo 'sleeping...' && sleep 10; done"
 
-#  dash:
+#  api:
 #    restart: always
 #    build:
 #      context: .
 #    volumes:
 #      - bus_assets:/app/assets
+#    # todo traefik — api at /api
 #    ports:
-#      - 80:8000
-##    environment:
-##      - FLASK_APP=/app/www-dash.py
-##      - FLASK_DEBUG=1 #future change this for deployment
-##      - 'RUN=flask run --host=0.0.0.0 --port=80'
-#    command: gunicorn -w 1 -b :8000 app:server
+#      - 80:5000
+#    environment:
+#      - FLASK_APP=/app/api.py
+#    command: flask run --host=0.0.0.0 --port=5000
+#    # command: gunicorn -w 1 -b :8000 app:server #todo change this for deployment
 #    # Infinite loop, to keep it alive, for debugging
 #    # command: bash -c "while true; do echo 'sleeping...' && sleep 10; done"
+#
+  api:
+    build:
+      context: .
+      dockerfile: ./build/api/Dockerfile
+    restart: always
+    ports:
+      - 80:8080
+    volumes:
+      - ./data:/app/data
+
+
+# traefik:
+#   todo install traefik
+
+#  map:
+#    todo traefik - react-bootstrap app at /
+#
+
+#  app:
+#    todo traefik - streamlit app at /dash
+
+
+# todo add with the dyndns.env from ~/deployments/gandi-livedns
+# todo stop the other gandi-livedns stack
+#services:
+#  dyndns:
+#    image: jbbodart/gandi-livedns
+#    restart: unless-stopped
+#    env_file:
+#      - "dyndns.env"
+#
 
 volumes:
   bus_database:

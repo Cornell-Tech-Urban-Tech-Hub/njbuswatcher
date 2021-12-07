@@ -7,6 +7,12 @@ from sqlalchemy.ext.declarative import declarative_base
 
 Base = declarative_base()
 
+from config import config
+
+def get_engine():
+    engine = create_engine(get_db_url(config.config['dbuser'], config.config['dbpassword'], config.config['dbhost'], config.config['dbport'], config.config['dbname']))
+    return engine
+
 def create_table(db_url):
     engine = create_engine(db_url, echo=False)
     Base.metadata.create_all(engine)
@@ -22,7 +28,7 @@ def get_db_args(args,config):
         'dbname'])
 
 def get_db_url(dbuser,dbpassword,dbhost,dbport,dbname):
-    return 'mysql://{}:{}@{}:{}/{}'.format(dbuser,dbpassword,dbhost,dbport,dbname)
+    return 'mysql+pymysql://{}:{}@{}:{}/{}'.format(dbuser,dbpassword,dbhost,dbport,dbname)
 
 def get_session(dbuser,dbpassword,dbhost,dbport,dbname):
     engine = create_engine(get_db_url(dbuser,dbpassword,dbhost,dbport,dbname), echo=False)
@@ -56,7 +62,6 @@ def Bus_to_BusObservation(raw_Buses, timestamp): #bug timestamp not getting enco
     return bus_observations
 
 
-
 class BusObservation(Base):
 
     __tablename__ ='buses'
@@ -70,21 +75,21 @@ class BusObservation(Base):
     # dip = Column(String(20))
     dn = Column(String(20))
     fs = Column(String(127))
-    id = Column(String(20))
-    # id = Column(String(20), index=True)
+    id = Column(String(20), index=True)
     m = Column(String(20))
     op = Column(String(20))
     pd = Column(String(255))
     pdrtpifeedname = Column(String(255))
     pid = Column(String(20))
-    rt = Column(String(20))
+    rt = Column(String(20), index=True)
     rtrtpifeedname = Column(String(20))
     rtdd = Column(String(20))
     rtpifeedname = Column(String(20))
     run = Column(String(8))
     wid1 = Column(String(20))
     wid2 = Column(String(20))
-    timestamp = Column(DateTime())
+    # todo index this somehow
+    timestamp = Column(DateTime(), index=True)
 
     # waypoint_distance = Column(Float())
     # waypoint_lat = Column(Float())

@@ -1,0 +1,1 @@
+ docker exec -it njbuswatcher_db_1 mysql -uroot -p

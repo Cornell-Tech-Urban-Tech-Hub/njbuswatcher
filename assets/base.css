@@ -145,7 +145,7 @@ Taken from https://codepen.io/chriddyp/pen/bWLwgP.css
   }
   body {
     font-size: 1.5em;
-   /* currently ems cause chrome bug misinterpreting rems on body element */
+   /* currently ems cause chrome */
     line-height: 1.6;
     font-weight: 400;
     font-family: "Open Sans", "HelveticaNeue", "Helvetica Neue", Helvetica, Arial, sans-serif;

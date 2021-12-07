@@ -2,6 +2,23 @@ import time
 from math import cos, asin, sqrt
 import os
 
+import typing
+from starlette.responses import Response
+import json
+
+class PrettyJSONResponse(Response):
+    media_type = "application/json"
+
+    def render(self, content: typing.Any) -> bytes:
+        return json.dumps(
+            content,
+            ensure_ascii=False,
+            allow_nan=False,
+            indent=4,
+            separators=(", ", ": "),
+        ).encode("utf-8")
+
+
 def timeit(f):
     def timed(*args, **kw):
         ts = time.time()

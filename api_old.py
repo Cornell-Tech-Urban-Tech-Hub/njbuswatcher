@@ -66,6 +66,8 @@ def query_builder(parameters):
             query_suffix = query_suffix + '{} = "{}" AND '.format(field,value)
     query_suffix=query_suffix[:-4] # strip tailing ' AND'
     return query_suffix
+
+# todo this should dump with indent=4
 def results_to_FeatureCollection(results):
     geojson = {'type': 'FeatureCollection', 'features': []}
     for row in results['observations']:
@@ -81,6 +83,7 @@ def results_to_FeatureCollection(results):
         geojson['features'].append(feature)
     return geojson
 
+#todo test debug kepler output
 def results_to_KeplerTable(query):
     results = query['observations']
     fields = [{"name":x} for x in dict.keys(results[0])]
@@ -130,8 +133,9 @@ class SystemAPI(Resource):
         elif request.args['output'] == 'kepler':
             return results_to_KeplerTable(results)
 
-# https://nj.buswatcher.org/api/v1/nj/buses?output=geojson&rt=119&start=2021-03-28T00:00:00+00:00&end=2021-04-30T00
-# :00:00+00:00
+
+# http://nj.buswatcher.org/api/v1/nj/buses?output=geojson&rt=119&start=2021-12-01T00:00:00+00:00&end=2022-01-01T00:00:00+00:00
+# http://127.0.0.1:5000/api/v1/nj/buses?output=geojson&rt=119&start=2021-12-01T00:00:00+00:00&end=2022-01-01T00:00:00+00:00
 # output=[geojson,kepler]
 # rt=route number
 # start=datetime in ISO8601
@@ -140,7 +144,7 @@ class SystemAPI(Resource):
 api.add_resource(SystemAPI, '/api/v1/nj/buses', endpoint='buses')
 
 
-
+# todo rebuild this, but pointing at a static file updated with each grab
 # #--------------- LEGACY ENDPOINTS ---------------
 #
 # # is the browser still caching this — wrap this in an http header to expire it?
