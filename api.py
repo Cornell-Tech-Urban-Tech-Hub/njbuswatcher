@@ -37,7 +37,7 @@ templates = Jinja2Templates(directory="assets/templates")
 load_dotenv()
 api_url_stem="/api/v2/nj/"
 api_key = os.getenv("MAPBOX_API_KEY")
-db_connect = db.get_engine()
+
 
 #--------------- HELPER FUNCTIONS ---------------
 
@@ -162,15 +162,14 @@ async def fetch_buses(rt: str, start:str, end:str, output: str):
     print(query_compound)
 
     # execute query
-    conn = db_connect.connect()
-    query = conn.execute(query_compound)
-
-    if output == 'json':
-        return {'observations': unpack_query_results(query)}
-    elif output == 'geojson':
-        return make_FeatureCollection(unpack_query_results(query))
-    elif output == 'kepler':
-        return make_KeplerTable(unpack_query_results(query))
+    with db.get_engine().connect() as conn:
+        query = conn.execute(query_compound)
+        if output == 'json':
+            return {'observations': unpack_query_results(query)}
+        elif output == 'geojson':
+            return make_FeatureCollection(unpack_query_results(query))
+        elif output == 'kepler':
+            return make_KeplerTable(unpack_query_results(query))
 
 
 # POSITIONS RIGHT NOW (makes separate request to Clever Devices API)
