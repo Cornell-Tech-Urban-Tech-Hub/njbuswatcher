@@ -3,9 +3,9 @@ import requests
 from apscheduler.schedulers.background import BackgroundScheduler
 from dotenv import load_dotenv
 
-from libraries import Archives as ar
-from libraries import Database as db
-from libraries import NJTransitAPI as njt
+from src import Archives as ar
+from src import Database as db
+from src import NJTransitAPI as njt
 from config import config
 
 
@@ -14,10 +14,10 @@ def grab_and_store(**kwargs):
     # path_list = get_path_list()
     # feeds = []
     url = njt._gen_command('nj','all_buses')
-    try:
-        response = requests.get(url, timeout=kwargs.get("interval"))
-    except:
-        print('something happened')
+    # try:
+    #     response = requests.get(url, timeout=kwargs.get("interval"))
+    # except:
+    #     print('something happened')
     # data = response.read().decode("utf-8")
     xml_data, timestamp = njt.get_xml_data('nj','all_buses')
     raw_buses = ar.dump_to_file(xml_data, timestamp)  # this returns the timestamp

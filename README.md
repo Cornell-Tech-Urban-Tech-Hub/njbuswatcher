@@ -102,11 +102,17 @@ talking to a database inside a docker container is a little weird
 
 ## 3. API
 
-The API returns a selected set of fields for all positions during a time interval specific using ISO 8601 format for a single route at a time. e.g.
+The v2 API returns a selected set of fields for all positions during a time interval specific using ISO 8601 format for a single route at a time. e.g.
 
-Required arguments: `output, rt, start, end`
-Output must be `geojson` for now, other formats may be supported in the future. Also try to limit to one hour of data per request.
+Required arguments: `rt, start, end`
+Output is in geojson.
 
 ```json
-http://nj.buswatcher.org/api/v1/nj/buses?output=geojson&rt=119&start=2021-03-28T00:00:00+00:00&end=2021-04-28T01:00:00+00:00
+http://nj.buswatcher.org/api/v2/nj/buses?rt=119&start=2021-03-28T00:00:00+00:00&end=2021-04-28T01:00:00+00:00
+```
+
+### live positions
+
+```json
+http://nj.buswatcher.org/api/v2/nj/buses/now
 ```

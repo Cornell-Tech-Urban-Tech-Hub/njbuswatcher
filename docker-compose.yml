@@ -16,36 +16,21 @@ services:
     volumes:
       - bus_database:/var/lib/mysql
 
-  grabber:
+  acquire:
     restart: always
     build:
       context: .
+      dockerfile: build/acquire/Dockerfile
     depends_on:
       - db
     volumes:
-      - bus_files:/app/data #todo map this to a host folder?
+      # - bus_files:/app/data #todo map this to a host folder?
+      - ./data:/app/data # bing mount
       - bus_assets:/app/assets
     command:
-      # tail -f /dev/null
-      /opt/conda/envs/njbuswatcher/bin/python3 /app/acquire.py
+      # tail -f /dev/null # use to start an exploding container and exec in
+      /usr/local/bin/python3 /app/acquire.py
 
-
-#  api:
-#    restart: always
-#    build:
-#      context: .
-#    volumes:
-#      - bus_assets:/app/assets
-#    # todo traefik — api at /api
-#    ports:
-#      - 80:5000
-#    environment:
-#      - FLASK_APP=/app/api.py
-#    command: flask run --host=0.0.0.0 --port=5000
-#    # command: gunicorn -w 1 -b :8000 app:server #todo change this for deployment
-#    # Infinite loop, to keep it alive, for debugging
-#    # command: bash -c "while true; do echo 'sleeping...' && sleep 10; done"
-#
   api:
     build:
       context: .
@@ -56,29 +41,38 @@ services:
     volumes:
       - ./data:/app/data
 
+  app:
+    build:
+      dockerfile: ./build/app/Dockerfile
+      context: ./
+    ports:
+      - '8501:8501'
+    volumes:
+      - './data:/usr/src/app/data:delegated'
+      - './project:/usr/src/app/project:delegated'
+    environment:
+      - USER_ID=1000
+      - GROUP_ID=1000
+    #future configure traefik --> njbuswatcher.org/dash (production only)
+    command:
+      tail -f /dev/null # use to start an exploding container and exec in
 
-# traefik:
-#   todo install traefik
+  #future add traefik container
+  # traefik:
 
-#  map:
-#    todo traefik - react-bootstrap app at /
-#
+  #  map:
+    #future configure traefik --> njbuswatcher.org/ (production only)
 
-#  app:
-#    todo traefik - streamlit app at /dash
-
-
-# todo add with the dyndns.env from ~/deployments/gandi-livedns
-# todo stop the other gandi-livedns stack
-#services:
-#  dyndns:
-#    image: jbbodart/gandi-livedns
-#    restart: unless-stopped
-#    env_file:
-#      - "dyndns.env"
-#
+  # future add with the dyndns.env from ~/deployments/gandi-livedns
+  # future stop the other gandi-livedns stack
+  #  dyndns:
+  #    image: jbbodart/gandi-livedns
+  #    restart: unless-stopped
+  #    env_file:
+  #      - "dyndns.env"
+  #
 
 volumes:
   bus_database:
-  bus_files:
+  # bus_files: # deprecated -- archived responses stored in ./data
   bus_assets:

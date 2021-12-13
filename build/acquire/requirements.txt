@@ -1,0 +1,15 @@
+apscheduler
+python-dotenv
+sqlalchemy
+dateutils
+starlette
+mysql-connector
+requests
+
+# aiofiles
+# geojson
+# jinja2
+# fastapi
+# uvicorn
+# sqlalchemy
+# pymysql
