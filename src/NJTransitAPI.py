@@ -1,15 +1,12 @@
-import datetime, os
+import os
 import xml.etree.ElementTree
 import time
-
-from datetime import date, datetime
-
+from math import cos, asin, sqrt
+from datetime import datetime, date
 import typing
 from starlette.responses import Response
 import json
 from dateutil.parser import isoparse
-
-from . import CommonTools as ct
 
 
 # API like: https://github.com/harperreed/transitapi/wiki/Unofficial-Bustracker-API
@@ -248,7 +245,7 @@ def parse_xml_getRoutePoints(data):
                         p.lon = float(_cond_get_single(pt, 'lon'))
                         p.waypoint_id = n
                         if n != 0:
-                            p.distance_to_prev_waypoint = ct.distance(p_prev.lat, p_prev.lon, p.lat, p.lon)
+                            p.distance_to_prev_waypoint = distance(p_prev.lat, p_prev.lon, p.lat, p.lon)
                         p_prev = p
                         n =+ 1
                         path.points.append(p)
@@ -266,9 +263,10 @@ def get_xml_data(source, function, **kwargs):
         try:
             data = urllib.request.urlopen(_gen_command(source, function, **kwargs)).read()
             if data:
-                timestamp=datetime.datetime.now()
+                timestamp=datetime.now()
                 break
-        except:
+        except Exception as e:
+            print (e)
             print (str(tries) + '/12 cant connect to NJT API... waiting 5s and retry')
             if tries < 12:
                 tries = tries + 1
@@ -284,7 +282,7 @@ def get_xml_data_save_raw(source, function, raw_dir, **kwargs):
     data = get_xml_data(source, function, **kwargs)
     if not os.path.exists(raw_dir):
         os.makedirs(raw_dir)
-    now = datetime.datetime.now()
+    now = datetime.now()
     handle = open(raw_dir + '/' + now.strftime('%Y%m%d.%H%M%S') + '.' + source + '.xml', 'w')
     handle.write(data)
     handle.close()
@@ -358,6 +356,13 @@ def make_KeplerTable(query):
         rows.append(r)
     kepler_bundle = {"fields": fields, "rows": rows }
     return kepler_bundle
+
+
+def distance(lat1, lon1, lat2, lon2):
+    p = 0.017453292519943295
+    a = 0.5 - cos((lat2-lat1)*p)/2 + cos(lat1*p)*cos(lat2*p) * (1-cos((lon2-lon1)*p)) / 2
+    return 5280 * (7918 * asin(sqrt(a))) # https://stackoverflow.com/questions/27928/calculate-distance-between-two-latitude-longitude-points-haversine-formula/11178145
+
 
 class PrettyJSONResponse(Response):
     media_type = "application/json"

@@ -5,13 +5,16 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy import Column, Date, DateTime, Integer, String, Float
 from sqlalchemy.ext.declarative import declarative_base
 
+import glob, shutil, datetime, gzip
+
+from . import NJTransitAPI as njt
+
 Base = declarative_base()
 
 from config import config
 
 def get_engine():
-    engine = create_engine(get_db_url(config.config['dbuser'], config.config['dbpassword'], config.config['dbhost'], config.config['dbport'], config.config['dbname']))
-    return engine
+    return create_engine(get_db_url(config.config['dbuser'], config.config['dbpassword'], config.config['dbhost'], config.config['dbport'], config.config['dbname']))
 
 def create_table(db_url):
     engine = create_engine(db_url, echo=False)
@@ -49,6 +52,7 @@ def dump_to_db(raw_buses,args,config,timestamp):
         num_buses = num_buses + 1
     session.commit()
     return num_buses
+
 
 def Bus_to_BusObservation(raw_Buses, timestamp): #bug timestamp not getting encoded—need to add it manually from time
     # of grab?
@@ -98,3 +102,53 @@ class BusObservation(Base):
 
     def __repr__(self):
         return '[BusPosition: \trt {}\ttimestamp {}\tlat {}\tlon {}\twaypoint_d {}\twaypoint_lat {}\twaypoint_lon {} ]'.format(self.rt, self.timestamp, self.lat, self.lon, self.waypoint_distance,self.waypoint_lat,self.waypoint_lon)
+
+
+
+def filepath():
+    path = ("data/")
+    check = os.path.isdir(path)
+    if not check:
+        os.makedirs(path)
+        print("created folder : ", path)
+    else:
+        pass
+    return path
+
+# future what about compressing and dumping to S3?
+def dump_to_file(localhost, xml_data, timestamp):
+
+    timestamp_pretty = timestamp.strftime("%Y-%m-%dT_%H:%M:%S.%f")
+    raw_buses = njt.parse_xml_getBusesForRouteAll(xml_data)
+
+    # # dump to files if we are in production mode only
+    # if os.environ['PYTHON_ENV'] == "development" or localhost==True:
+    #     pass
+    # else:
+    #     dumpfile=(filepath() + 'nj_buses_all_' + timestamp_pretty + '.gz')
+    #     with gzip.open(dumpfile, 'wt', encoding="ascii") as zipfile:
+    #         try:
+    #             zipfile.write(xml_data)
+    #         except:
+    #             pass # if error, dont write and return
+    return raw_buses
+
+
+def rotate_files(): # https://programmersought.com/article/77402568604/
+    today = datetime.date.today()
+    yesterday = today - datetime.timedelta(days = 1) # e.g. 2020-10-04
+    # print ('today is {}, yesterday was {}'.format(today,yesterday))
+    filepath = './data/'
+    outfile = '{}daily-{}.gz'.format(filepath, yesterday)
+    # print ('bundling minute grabs from {} into {}'.format(yesterday,outfile))
+    all_gz_files = glob.glob("{}*.gz".format(filepath))
+    yesterday_gz_files = []
+    for file in all_gz_files:
+        if file[7:17] == str(yesterday): # bug parse the path using os.path.join?
+            yesterday_gz_files.append(file)
+    with open(outfile, 'wb') as wfp:
+        for fn in yesterday_gz_files:
+            with open(fn, 'rb') as rfp:
+                shutil.copyfileobj(rfp, wfp)
+    for file in yesterday_gz_files:
+        os.remove(file) #bug this isnt working?

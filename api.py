@@ -4,6 +4,7 @@ from dateutil.parser import isoparse
 from argparse import ArgumentParser
 import logging
 import os
+import json
 
 from fastapi import FastAPI, Query, Path
 from fastapi.templating import Jinja2Templates
@@ -102,6 +103,20 @@ async def fetch_live():
 
     # return bus_observations
     return njt.results_to_FeatureCollection([b.__dict__ for b in bus_observations])
+
+
+@app.get("/api/v2/nj/dashboard", response_class=njt.PrettyJSONResponse)
+# return JSON data for dashboard charts
+# http://nj.buswatcher.org/api/v2/nj/dashboard
+# http://127.0.0.1:5000/api/v2/nj/dashboard
+async def fetch_dashboard():
+    try:
+        with open('data/dashboard.json', 'r') as f:
+            return json.load(f)
+    except:
+        return {'error':'could not load dashboard'}
+
+
 
 
 
