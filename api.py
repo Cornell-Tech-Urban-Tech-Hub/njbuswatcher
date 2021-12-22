@@ -53,7 +53,7 @@ api_key = os.getenv("MAPBOX_API_KEY")
 # start=datetime in ISO8601
 # end=datetime in ISO8601
 
-# # todo debug field validation
+# # future debug field validation
 # async def fetch_buses(*,
 #                       rt: str = Path(..., max_length=3),
 #                       start:datetime = Path(..., ge=1, le=12),

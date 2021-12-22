@@ -1,10 +1,12 @@
 import os
 import json
 import requests
+import argparse
 from dotenv import load_dotenv
 from dateutil.parser import isoparse
 import datetime as dt
-
+from config import config
+from sqlalchemy import create_engine
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -17,13 +19,16 @@ import altair as alt
 from src import Database as db
 
 #--------------- MY INITIALIZATION ---------------
+parser = argparse.ArgumentParser(description='NJTransit dashboard')
+parser.add_argument('-l', action="store_true", dest="localhost", help="force localhost for production mode")
+args = parser.parse_args()
 
 load_dotenv()
 api_url_stem="/api/v2/nj/"
 api_key = os.getenv("MAPBOX_API_KEY")
 
-hostname = '127.0.0.1:5000'#todo update data source dynamic hostname from config
-base_url = f'http://{hostname}'
+# hostname = '127.0.0.1:5000'
+base_url = config.config['api_base_url']
 dashboard_url = f'{base_url}/api/v2/nj/dashboard'
 positions_url = f'{base_url}/api/v2/nj/now'
 
@@ -56,8 +61,8 @@ hide_streamlit_style = """
             """
 st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 
-
-with db.get_engine().connect() as conn:
+with create_engine(db.get_db_url(*db.get_db_args(args,config))).connect() as conn: #todo this should be easier to get from db
+#with db.get_engine().connect() as conn:
 
     ################################################################################################################################################
     # map
@@ -133,11 +138,8 @@ with db.get_engine().connect() as conn:
     def generate_data():
         dashboard_data = fetch_dashboard()['observations_by_date']
         format = '%Y-%m-%d'
-        # start = dt.datetime.strptime(data[0], format).date()
         start = dt.datetime.strptime(dashboard_data[0]['date'], format)
-        # end = dt.datetime.strptime(data[-1], format).date()
         end = dt.datetime.strptime(dashboard_data[-1]['date'], format)
-        # dates = [start + dt.timedelta(days=i) for i in range(num)]
         dates = [start + dt.timedelta(days=x) for x in range(0, (end-start).days)]
         data = [d['num'] for d in dashboard_data]
         return dates, data
@@ -148,7 +150,10 @@ with db.get_engine().connect() as conn:
         j = np.array(j) - 1
         ni = max(i) + 1
         calendar = np.nan * np.zeros((ni, 7))
-        calendar[i, j] = data
+        try:
+            calendar[i, j] = data
+        except ValueError:
+            print ('i got a ValueError, looks like you dont have enough data')
         return i, j, calendar
 
     def calendar_heatmap(ax, dates, data):
@@ -162,11 +167,9 @@ with db.get_engine().connect() as conn:
         ni, nj = calendar.shape
         day_of_month = np.nan * np.zeros((ni, 7))
         day_of_month[i, j] = [d.day for d in dates]
-
         for (i, j), day in np.ndenumerate(day_of_month):
             if np.isfinite(day):
                 ax.text(j, i, int(day), ha='center', va='center')
-
         ax.set(xticks=np.arange(7),
                xticklabels=['M', 'T', 'W', 'R', 'F', 'S', 'S'])
         ax.xaxis.tick_top()
@@ -181,7 +184,6 @@ with db.get_engine().connect() as conn:
         ax.set(yticks=yticks)
         ax.set_yticklabels(labels, rotation=90)
 
-    # run the above
     heatmap()
 
 
@@ -203,15 +205,13 @@ with db.get_engine().connect() as conn:
     # # https://developers.google.com/earth-engine/tutorials/community/time-series-visualization-with-altair
     #
     # # dict is one count per day
-    # #todo update data source dynamic hostname from config
-    # dashboard_url='http://127.0.0.1:5000/api/v2/nj/dashboard'
     # chartdata = json.loads(requests.get(dashboard_url, timeout=5).text)
     #
     # df = pd.DataFrame(chartdata)
     # df['date'] = pd.to_datetime(df['date'], yearfirst=True)
     # df = df.set_index('date', drop=True)
     #
-    # #todo update to show each unique year-month, with days on x-axis
+    # # update to show each unique year-month, with days on x-axis
     # df['year'] = df.index.year
     # df['month'] = df.index.month
     # df['day'] = df.index.day

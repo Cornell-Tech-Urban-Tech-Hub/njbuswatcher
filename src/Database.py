@@ -92,7 +92,6 @@ class BusObservation(Base):
     run = Column(String(8))
     wid1 = Column(String(20))
     wid2 = Column(String(20))
-    # todo index this somehow
     timestamp = Column(DateTime(), index=True)
 
     # waypoint_distance = Column(Float())
@@ -144,11 +143,11 @@ def rotate_files(): # https://programmersought.com/article/77402568604/
     all_gz_files = glob.glob("{}*.gz".format(filepath))
     yesterday_gz_files = []
     for file in all_gz_files:
-        if file[7:17] == str(yesterday): # bug parse the path using os.path.join?
+        if file[7:17] == str(yesterday):
             yesterday_gz_files.append(file)
     with open(outfile, 'wb') as wfp:
         for fn in yesterday_gz_files:
             with open(fn, 'rb') as rfp:
                 shutil.copyfileobj(rfp, wfp)
     for file in yesterday_gz_files:
-        os.remove(file) #bug this isnt working?
+        os.remove(file)

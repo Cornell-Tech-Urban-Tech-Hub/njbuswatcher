@@ -4,12 +4,5 @@ sqlalchemy
 dateutils
 starlette
 mysql-connector
+pymysql
 requests
-
-# aiofiles
-# geojson
-# jinja2
-# fastapi
-# uvicorn
-# sqlalchemy
-# pymysql

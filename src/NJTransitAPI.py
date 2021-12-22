@@ -207,7 +207,7 @@ def parse_xml_getRoutePoints(data):
         if len(child.getchildren()) == 0:
             if child.tag == 'id':
                 route.identity = child.text
-            # todo make lat, lon into float as soon as fetched?
+            # bug we make lat, lon into float as soon as fetched? why are they string in the dict later?
             else:
                 route.add_kv(child.tag, child.text)
         if child.tag == 'pas':
@@ -318,7 +318,7 @@ def query_builder(parameters):
     query_suffix=query_suffix[:-4] # strip tailing ' AND'
     return query_suffix
 
-# todo this simple rewrite the result dictionary, not create actual JSON
+
 def results_to_FeatureCollection(results):
     geojson = {'type': 'FeatureCollection', 'features': []}
     # for row in results['observations']:
@@ -336,7 +336,7 @@ def results_to_FeatureCollection(results):
     return geojson
 
 
-#todo test debug kepler output
+#future test debug kepler output
 def make_KeplerTable(query):
     results = query['observations']
     fields = [{"name":x} for x in dict.keys(results[0])]
