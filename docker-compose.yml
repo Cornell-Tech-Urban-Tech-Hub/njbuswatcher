@@ -5,7 +5,8 @@ version: '3.7'
 
 services:
   db:
-    image: mysql:5.7
+    image: mariadb:10.5.8 #for ARM compatibility on Apple Silicon development platform
+    # image: mysql:5.7
     restart: always
     environment:   # Set up mysql database name and password
       MYSQL_ROOT_PASSWORD: njtransit

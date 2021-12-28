@@ -136,12 +136,14 @@ with create_engine(db.get_db_url(*db.get_db_args(args,config))).connect() as con
         st.pyplot(fig)
 
     def generate_data():
-        dashboard_data = fetch_dashboard()['observations_by_date']
+        heatmap_data = dash_data['observations_by_date']
+        st.write(heatmap_data)
         format = '%Y-%m-%d'
-        start = dt.datetime.strptime(dashboard_data[0]['date'], format)
-        end = dt.datetime.strptime(dashboard_data[-1]['date'], format)
+        start = dt.datetime.strptime(heatmap_data[0]['date'], format)
+        end = dt.datetime.strptime(heatmap_data[-1]['date'], format)
         dates = [start + dt.timedelta(days=x) for x in range(0, (end-start).days)]
-        data = [d['num'] for d in dashboard_data]
+        data = [d['num'] for d in heatmap_data]
+        st.write(data)
         return dates, data
 
     def calendar_array(dates, data):
@@ -150,10 +152,7 @@ with create_engine(db.get_db_url(*db.get_db_args(args,config))).connect() as con
         j = np.array(j) - 1
         ni = max(i) + 1
         calendar = np.nan * np.zeros((ni, 7))
-        try:
-            calendar[i, j] = data
-        except ValueError:
-            print ('i got a ValueError, looks like you dont have enough data')
+        calendar[i, j] = data
         return i, j, calendar
 
     def calendar_heatmap(ax, dates, data):
