@@ -42,7 +42,7 @@ services:
     volumes:
       - ./data:/app/data
     command:
-      uvicorn api:app --host 0.0.0.0 --port 8080
+      uvicorn api:app --host 0.0.0.0 --port 8080 #todo this doesnt seem to be accessible from outside on server—did not test locally
 
 
   app:

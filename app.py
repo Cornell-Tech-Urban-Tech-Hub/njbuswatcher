@@ -137,13 +137,11 @@ with create_engine(db.get_db_url(*db.get_db_args(args,config))).connect() as con
 
     def generate_data():
         heatmap_data = dash_data['observations_by_date']
-        st.write(heatmap_data)
         format = '%Y-%m-%d'
         start = dt.datetime.strptime(heatmap_data[0]['date'], format)
-        end = dt.datetime.strptime(heatmap_data[-1]['date'], format)
-        dates = [start + dt.timedelta(days=x) for x in range(0, (end-start).days)]
+        num_dates = len(heatmap_data)
+        dates = [start + dt.timedelta(days=x) for x in range(0, num_dates)]
         data = [d['num'] for d in heatmap_data]
-        st.write(data)
         return dates, data
 
     def calendar_array(dates, data):
