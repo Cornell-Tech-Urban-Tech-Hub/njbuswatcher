@@ -263,9 +263,11 @@ with create_engine(db.get_db_url(*db.get_db_args(args,config))).connect() as con
 
 
     def display_years(z, years):
+        st.write(years)
         fig = subplots.make_subplots(rows=len(years), cols=1, subplot_titles=years)
         for i, year in enumerate(years):
             data = z[i*365 : (i+1)*365]
+            st.write(data)
             display_year(data, year=year, fig=fig, row=i)
             fig.update_layout(height=250*len(years))
         return fig
