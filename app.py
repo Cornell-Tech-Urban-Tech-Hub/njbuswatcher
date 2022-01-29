@@ -131,7 +131,6 @@ with create_engine(db.get_db_url(*db.get_db_args(args,config))).connect() as con
     #todo remove legend from plot
     st.bar_chart(df['num'])
 
-    st.write(df)
 
     ################################################################################################################################################
     # all time by day and month -- calendar heatmap
@@ -276,7 +275,6 @@ with create_engine(db.get_db_url(*db.get_db_args(args,config))).connect() as con
 
     def generate_data():
         heatmap_data = dash_data['observations_by_date']
-        st.write(heatmap_data)
         format = '%Y-%m-%d'
         start = dt.datetime.strptime(heatmap_data[0]['date'], format)
         num_dates = len(heatmap_data)
@@ -286,6 +284,8 @@ with create_engine(db.get_db_url(*db.get_db_args(args,config))).connect() as con
         return (start.year, dates[-1].year), data
 
     years, data = generate_data()
+    st.write(years)
+    st.write(data)
     if len(years) == 1:
         years = (years[0],)
     elif len(years) > 1:
