@@ -265,6 +265,7 @@ with create_engine(db.get_db_url(*db.get_db_args(args,config))).connect() as con
 
 
     def display_years(z, years):
+        st.write(z,years)
         fig = subplots.make_subplots(rows=len(years), cols=1, subplot_titles=years)
         for i, year in enumerate(years):
             data = z[i*365 : (i+1)*365]
@@ -284,8 +285,6 @@ with create_engine(db.get_db_url(*db.get_db_args(args,config))).connect() as con
         return (start.year, dates[-1].year), data
 
     years, data = generate_data()
-    st.write(years)
-    st.write(data)
     if len(years) == 1:
         years = (years[0],)
     elif len(years) > 1:
