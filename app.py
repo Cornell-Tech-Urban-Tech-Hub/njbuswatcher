@@ -125,10 +125,13 @@ with create_engine(db.get_db_url(*db.get_db_args(args,config))).connect() as con
     dash_data = fetch_dashboard()
     chart_data = dash_data['observations_by_hour']
     df = pd.DataFrame([r for r in chart_data], columns=['date', 'hour', 'num'])
+
+
     df.index = pd.to_datetime(df['date'] + ' ' + df['hour']+':00:00')
     #todo remove legend from plot
     st.bar_chart(df['num'])
 
+    st.write(df)
 
     ################################################################################################################################################
     # all time by day and month -- calendar heatmap
@@ -263,11 +266,9 @@ with create_engine(db.get_db_url(*db.get_db_args(args,config))).connect() as con
 
 
     def display_years(z, years):
-        st.write(years)
         fig = subplots.make_subplots(rows=len(years), cols=1, subplot_titles=years)
         for i, year in enumerate(years):
             data = z[i*365 : (i+1)*365]
-            st.write(data)
             display_year(data, year=year, fig=fig, row=i)
             fig.update_layout(height=250*len(years))
         return fig
@@ -275,6 +276,7 @@ with create_engine(db.get_db_url(*db.get_db_args(args,config))).connect() as con
 
     def generate_data():
         heatmap_data = dash_data['observations_by_date']
+        st.write(heatmap_data)
         format = '%Y-%m-%d'
         start = dt.datetime.strptime(heatmap_data[0]['date'], format)
         num_dates = len(heatmap_data)
