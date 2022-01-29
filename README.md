@@ -1,5 +1,5 @@
 # NJTransit Scraper
-#### v4.1 2021 Dec 4
+#### v4.1.1 2022 Jan 29
 Anthony Townsend <atownsend@cornell.edu>
 
 ### dependencies

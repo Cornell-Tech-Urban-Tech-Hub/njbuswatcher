@@ -1,4 +1,4 @@
-import os
+ import os
 import json
 import requests
 import argparse
@@ -76,45 +76,45 @@ with create_engine(db.get_db_url(*db.get_db_args(args,config))).connect() as con
 
 
 
-    ################################################################################################################################################
-    # map
-    ################################################################################################################################################
-
-
-    st.subheader("Right Now")
-    st.write ("Map indicates last observed positions of all NJTransit buses statewide.")
-
-
-
-    map = folium.Map(
-        location=[39.833851,-74.871826],
-        # tiles='Stamen Toner',
-        # tiles='Stamen Terrain',
-        # tiles='CartoDB Dark Matter',
-        tiles='CartoDB Positron',
-        zoom_start=8)
-    mapdata = requests.get(positions_url, timeout=5)
-    # get bounding box
-    points = [(f['geometry']['coordinates'][0], f['geometry']['coordinates'][1]) for f in json.loads(mapdata.content)['features']]
-    sw = min(points)[1], min(points)[0]
-    ne = max(points)[1], max(points)[0]
-    map.fit_bounds([sw, ne])
-    # draw map
-    folium.GeoJson(
-        json.loads(mapdata.content),
-        name="geojson",
-        marker = folium.CircleMarker(radius = 3, # Radius in metres
-                                     weight = 1, #outline weight
-                                     color = '#ffffff',
-                                     fill_color = '#efcc00',
-                                     fill_opacity = 1),
-        tooltip = folium.GeoJsonTooltip(fields = ['rt', 'id', 'fs'],
-                                        aliases=['Route: ', 'Bus ID:', 'Headsign:'],
-                                        style = ("background-color: white; color: #333333; font-family: arial; font-size: 12px; padding: 10px;"),
-                                        sticky = True
-                                        )
-    ).add_to(map)
-    folium_static(map)
+    # ################################################################################################################################################
+    # # map
+    # ################################################################################################################################################
+    #
+    #
+    # st.subheader("Right Now")
+    # st.write ("Map indicates last observed positions of all NJTransit buses statewide.")
+    #
+    #
+    #
+    # map = folium.Map(
+    #     location=[39.833851,-74.871826],
+    #     # tiles='Stamen Toner',
+    #     # tiles='Stamen Terrain',
+    #     # tiles='CartoDB Dark Matter',
+    #     tiles='CartoDB Positron',
+    #     zoom_start=8)
+    # mapdata = requests.get(positions_url, timeout=5)
+    # # get bounding box
+    # points = [(f['geometry']['coordinates'][0], f['geometry']['coordinates'][1]) for f in json.loads(mapdata.content)['features']]
+    # sw = min(points)[1], min(points)[0]
+    # ne = max(points)[1], max(points)[0]
+    # map.fit_bounds([sw, ne])
+    # # draw map
+    # folium.GeoJson(
+    #     json.loads(mapdata.content),
+    #     name="geojson",
+    #     marker = folium.CircleMarker(radius = 3, # Radius in metres
+    #                                  weight = 1, #outline weight
+    #                                  color = '#ffffff',
+    #                                  fill_color = '#efcc00',
+    #                                  fill_opacity = 1),
+    #     tooltip = folium.GeoJsonTooltip(fields = ['rt', 'id', 'fs'],
+    #                                     aliases=['Route: ', 'Bus ID:', 'Headsign:'],
+    #                                     style = ("background-color: white; color: #333333; font-family: arial; font-size: 12px; padding: 10px;"),
+    #                                     sticky = True
+    #                                     )
+    # ).add_to(map)
+    # folium_static(map)
 
 
     ################################################################################################################################################
