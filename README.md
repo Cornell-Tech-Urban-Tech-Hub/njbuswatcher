@@ -1,6 +1,14 @@
 # NJTransit Scraper
-#### v4.1.1 2022 Jan 29
+#### v4.2 2022 Marc 1
 Anthony Townsend <atownsend@cornell.edu>
+
+# new development env
+
+following [this tutorial](https://spin.atomicobject.com/2021/06/16/docker-development-container/) create a development container that syncs back to the production container stack locally
+```
+With all of this in place, we can spin up the development container inside VS Code. Then, from the VS Code terminal in our Docker container environment, we can run docker-compose up in the root of our project. This will start up our individual service containers on the host machine. But, thanks to the shared network and volumes, we can continue to edit code in our development container and see the changes immediately show up on our services!
+```
+
 
 ### dependencies
 
@@ -10,7 +18,6 @@ Anthony Townsend <atownsend@cornell.edu>
 ## function
 
 Fetches list of active routes from NJTransit Clever Devices API http requests, then cycles through and fetches current vehicle positions for all buses operating on these routes. This avoids the poor performance of trying to grab the entire system feed from the MTA BusTime SIRI API. Dumps full API response (for later reprocessing to extract additional data) to compressed individual files and most of the vehicle status fields to mysql table (the upcoming stop data is omitted from the database dump for now). Fully dockerized, runs on scheduler 1x per minute. Data storage requirments ~ 1-2 Gb/day (guesstimate).
-
 
 ## installation 
 
